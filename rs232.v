@@ -14,7 +14,6 @@ output reg   po_flag
 
 parameter    BAUD_CNT_MAX=clk_freq/uart_bps;
 
-
 reg   rx_reg1;
 reg   rx_reg2;
 reg   rx_reg3;
@@ -25,7 +24,6 @@ reg   bit_flag;
 reg   [3:0]bit_cnt;
 reg   [7:0]rx_data;
 reg   rx_flag;
-
 
 always@(posedge system_clk or negedge system_rst_n)
     if (system_rst_n==1'b0)
@@ -44,6 +42,7 @@ always@(posedge system_clk or negedge system_rst_n)
 	    rx_reg3<=1'b1;
     else
 	    rx_reg3<=rx_reg2;
+		
 always@(posedge system_clk or negedge system_rst_n)
     if (system_rst_n==1'b0)
 	    start_flag<=1'b0;
@@ -59,7 +58,9 @@ always@(posedge system_clk or negedge system_rst_n)
 	    work_en<=1'b1;
 	else if ((bit_cnt==4'd8)&&(bit_flag==1'b1))
 	    work_en<=1'b0;
-	
+	else
+	    work_en<=work_en;
+		
 always@(posedge system_clk or negedge system_rst_n)
     if (system_rst_n==1'b0)
 	    baud_cnt<=16'd0;
@@ -71,7 +72,7 @@ always@(posedge system_clk or negedge system_rst_n)
 always@(posedge system_clk or negedge system_rst_n)
     if (system_rst_n==1'b0)
 	    bit_flag<=1'b0;
-    else if (bit_cnt==BAUD_CNT_MAX/2-1)
+    else if (baud_cnt==BAUD_CNT_MAX/2-1)
 	    bit_flag<=1'b1;
 	else
 	    bit_flag<=1'b0;
@@ -83,11 +84,13 @@ always@(posedge system_clk or negedge system_rst_n)
 	    bit_cnt<=4'd0;
 	else if (bit_flag==1'b1)
 	    bit_cnt<=bit_cnt+1'b1;
+		
 always@(posedge system_clk or negedge system_rst_n)
     if (system_rst_n==1'b0)
 	    rx_data<=8'd0;
 	else if((bit_cnt>=4'd1)&&(bit_cnt<=4'd8)&&(bit_flag==1'b1))
 	    rx_data={rx_reg3,rx_data[7:1]};
+		
 always@(posedge system_clk or negedge system_rst_n)
     if (system_rst_n==1'b0)
 	    rx_flag<=1'b0;
